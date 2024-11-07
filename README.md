@@ -1,7 +1,9 @@
 Status
 ======
 
-I don't maintain Sculptgl anymore (except small/minor fixes).
+In the Original SculptGL repository, we want to add the following features:
+  1. Ability to add a shape (say sphere) and then being able to apply transformations to the sphere and have an intuitive way to position the sphere on another object.
+  2. Ability to add a prompt or a reference of a model to be created and then call an external API to load the generated model onto the interface.
 
 SculptGL - WebGL sculpting
 ==========================
