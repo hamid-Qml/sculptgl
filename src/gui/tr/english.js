@@ -41,6 +41,8 @@ var TR = {
   fileExportRoughness: 'Save roughness',
   fileExportMetalness: 'Save metalness',
 
+  genAITitle: 'Generate with AI',
+
   // scene
   sceneTitle: 'Scene',
   sceneReset: 'Clear scene',

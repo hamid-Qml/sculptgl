@@ -13,7 +13,6 @@ var MOUSE_RIGHT = 3;
 
 // Manage events
 class SculptGL extends Scene {
-
   constructor() {
     super();
 
@@ -74,6 +73,13 @@ class SculptGL extends Scene {
     window.addEventListener('dragover', cbStopAndPrevent, false);
     window.addEventListener('drop', cbLoadFiles, false);
     document.getElementById('fileopen').addEventListener('change', cbLoadFiles, false);
+
+    // Other toolbars...
+    // TODO: think; not sure if this is the best approach yet.probably better to just extend the yagui interface instead of adding a separate different one
+    document.getElementById('left-toolbar').style.visibility = 'visible';
+    document.getElementById('left-toolbar-tool-transform').addEventListener('click', () => {
+      this._gui.callFunc('onChangeTool', Enums.Tools.TRANSFORM);
+    });
   }
 
   onPointer(event) {
@@ -89,40 +95,48 @@ class SculptGL extends Scene {
   _initHammerRecognizers() {
     var hm = this._hammer;
     // double tap
-    hm.add(new Tap({
-      event: 'doubletap',
-      pointers: 1,
-      taps: 2,
-      time: 250, // def : 250.  Maximum press time in ms.
-      interval: 450, // def : 300. Maximum time in ms between multiple taps.
-      threshold: 5, // def : 2. While doing a tap some small movement is allowed.
-      posThreshold: 50 // def : 30. The maximum position difference between multiple taps.
-    }));
+    hm.add(
+      new Tap({
+        event: 'doubletap',
+        pointers: 1,
+        taps: 2,
+        time: 250, // def : 250.  Maximum press time in ms.
+        interval: 450, // def : 300. Maximum time in ms between multiple taps.
+        threshold: 5, // def : 2. While doing a tap some small movement is allowed.
+        posThreshold: 50, // def : 30. The maximum position difference between multiple taps.
+      })
+    );
 
     // double tap 2 fingers
-    hm.add(new Tap({
-      event: 'doubletap2fingers',
-      pointers: 2,
-      taps: 2,
-      time: 250,
-      interval: 450,
-      threshold: 5,
-      posThreshold: 50
-    }));
+    hm.add(
+      new Tap({
+        event: 'doubletap2fingers',
+        pointers: 2,
+        taps: 2,
+        time: 250,
+        interval: 450,
+        threshold: 5,
+        posThreshold: 50,
+      })
+    );
 
     // pan
-    hm.add(new Pan({
-      event: 'pan',
-      pointers: 0,
-      threshold: 0
-    }));
+    hm.add(
+      new Pan({
+        event: 'pan',
+        pointers: 0,
+        threshold: 0,
+      })
+    );
 
     // pinch
-    hm.add(new Pinch({
-      event: 'pinch',
-      pointers: 2,
-      threshold: 0.1 // Set a minimal thresold on pinch event, to be detected after pan
-    }));
+    hm.add(
+      new Pinch({
+        event: 'pinch',
+        pointers: 2,
+        threshold: 0.1, // Set a minimal thresold on pinch event, to be detected after pan
+      })
+    );
     hm.get('pinch').recognizeWith(hm.get('pan'));
   }
 
@@ -166,8 +180,7 @@ class SculptGL extends Scene {
   // MOBILE EVENTS
   ////////////////
   onPanStart(e) {
-    if (e.pointerType === 'mouse')
-      return;
+    if (e.pointerType === 'mouse') return;
     this._focusGui = false;
     var evProxy = this._eventProxy;
     evProxy.pageX = e.center.x;
@@ -176,8 +189,7 @@ class SculptGL extends Scene {
   }
 
   onPanMove(e) {
-    if (e.pointerType === 'mouse')
-      return;
+    if (e.pointerType === 'mouse') return;
     var evProxy = this._eventProxy;
     evProxy.pageX = e.center.x;
     evProxy.pageY = e.center.y;
@@ -191,9 +203,12 @@ class SculptGL extends Scene {
 
     if (this._isIOS()) {
       window.clearTimeout(this._timerResetPointer);
-      this._timerResetPointer = window.setTimeout(function () {
-        this._lastNbPointers = 0;
-      }.bind(this), 60);
+      this._timerResetPointer = window.setTimeout(
+        function () {
+          this._lastNbPointers = 0;
+        }.bind(this),
+        60
+      );
     }
   }
 
@@ -212,13 +227,15 @@ class SculptGL extends Scene {
   }
 
   onPanEnd(e) {
-    if (e.pointerType === 'mouse')
-      return;
+    if (e.pointerType === 'mouse') return;
     this.onDeviceUp();
     // we need to detect when all fingers are released
-    window.setTimeout(function () {
-      if (!e.pointers.length) this._lastNbPointers = 0;
-    }.bind(this), 60);
+    window.setTimeout(
+      function () {
+        if (!e.pointers.length) this._lastNbPointers = 0;
+      }.bind(this),
+      60
+    );
   }
 
   onDoubleTap(e) {
@@ -307,8 +324,7 @@ class SculptGL extends Scene {
 
   readFile(file, ftype) {
     var fileType = ftype || this.getFileType(file.name);
-    if (!fileType)
-      return;
+    if (!fileType) return;
 
     var reader = new FileReader();
     var self = this;
@@ -317,10 +333,8 @@ class SculptGL extends Scene {
       document.getElementById('fileopen').value = '';
     };
 
-    if (fileType === 'obj')
-      reader.readAsText(file);
-    else
-      reader.readAsArrayBuffer(file);
+    if (fileType === 'obj') reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
   }
 
   ////////////////
@@ -378,12 +392,9 @@ class SculptGL extends Scene {
     this._sculptManager.end();
 
     if (this._action === Enums.Action.MASK_EDIT && this._mesh) {
-
       if (this._lastMouseX === this._maskX && this._lastMouseY === this._maskY)
         this.getSculptManager().getTool(Enums.Tools.MASKING).invert();
-      else
-        this.getSculptManager().getTool(Enums.Tools.MASKING).clear();
-
+      else this.getSculptManager().getTool(Enums.Tools.MASKING).clear();
     }
 
     this._action = Enums.Action.NOTHING;
@@ -400,8 +411,7 @@ class SculptGL extends Scene {
     Multimesh.RENDER_HINT = Multimesh.CAMERA;
     this.render();
     // workaround for "end mouse wheel" event
-    if (this._timerEndWheel)
-      window.clearTimeout(this._timerEndWheel);
+    if (this._timerEndWheel) window.clearTimeout(this._timerEndWheel);
     this._timerEndWheel = window.setTimeout(this._endWheel.bind(this), 300);
   }
 
@@ -417,8 +427,7 @@ class SculptGL extends Scene {
   }
 
   onDeviceDown(event) {
-    if (this._focusGui)
-      return;
+    if (this._focusGui) return;
 
     this.setMousePosition(event);
 
@@ -427,26 +436,19 @@ class SculptGL extends Scene {
     var button = event.which;
 
     var canEdit = false;
-    if (button === MOUSE_LEFT)
-      canEdit = this._sculptManager.start(event.shiftKey);
+    if (button === MOUSE_LEFT) canEdit = this._sculptManager.start(event.shiftKey);
 
-    if (button === MOUSE_LEFT && canEdit)
-      this.setCanvasCursor('none');
+    if (button === MOUSE_LEFT && canEdit) this.setCanvasCursor('none');
 
-    if (button === MOUSE_RIGHT && event.ctrlKey)
-      this._action = Enums.Action.CAMERA_ZOOM;
-    else if (button === MOUSE_MIDDLE)
-      this._action = Enums.Action.CAMERA_PAN;
+    if (button === MOUSE_RIGHT && event.ctrlKey) this._action = Enums.Action.CAMERA_ZOOM;
+    else if (button === MOUSE_MIDDLE) this._action = Enums.Action.CAMERA_PAN;
     else if (!canEdit && event.ctrlKey) {
       this._maskX = mouseX;
       this._maskY = mouseY;
       this._action = Enums.Action.MASK_EDIT;
-    } else if ((!canEdit || button === MOUSE_RIGHT) && event.altKey)
-      this._action = Enums.Action.CAMERA_PAN_ZOOM_ALT;
-    else if (button === MOUSE_RIGHT || (button === MOUSE_LEFT && !canEdit))
-      this._action = Enums.Action.CAMERA_ROTATE;
-    else
-      this._action = Enums.Action.SCULPT_EDIT;
+    } else if ((!canEdit || button === MOUSE_RIGHT) && event.altKey) this._action = Enums.Action.CAMERA_PAN_ZOOM_ALT;
+    else if (button === MOUSE_RIGHT || (button === MOUSE_LEFT && !canEdit)) this._action = Enums.Action.CAMERA_ROTATE;
+    else this._action = Enums.Action.SCULPT_EDIT;
 
     if (this._action === Enums.Action.CAMERA_ROTATE || this._action === Enums.Action.CAMERA_ZOOM)
       this._camera.start(mouseX, mouseY);
@@ -460,8 +462,7 @@ class SculptGL extends Scene {
   }
 
   onDeviceMove(event) {
-    if (this._focusGui)
-      return;
+    if (this._focusGui) return;
     this.setMousePosition(event);
 
     var mouseX = this._mouseX;
@@ -470,34 +471,25 @@ class SculptGL extends Scene {
     var speedFactor = this.getSpeedFactor();
 
     if (action === Enums.Action.CAMERA_ZOOM || (action === Enums.Action.CAMERA_PAN_ZOOM_ALT && !event.altKey)) {
-
       Multimesh.RENDER_HINT = Multimesh.CAMERA;
       this._camera.zoom((mouseX - this._lastMouseX + mouseY - this._lastMouseY) * speedFactor);
       this.render();
-
     } else if (action === Enums.Action.CAMERA_PAN_ZOOM_ALT || action === Enums.Action.CAMERA_PAN) {
-
       Multimesh.RENDER_HINT = Multimesh.CAMERA;
       this._camera.translate((mouseX - this._lastMouseX) * speedFactor, (mouseY - this._lastMouseY) * speedFactor);
       this.render();
-
     } else if (action === Enums.Action.CAMERA_ROTATE) {
-
       Multimesh.RENDER_HINT = Multimesh.CAMERA;
-      if (!event.shiftKey)
-        this._camera.rotate(mouseX, mouseY);
+      if (!event.shiftKey) this._camera.rotate(mouseX, mouseY);
       this.render();
-
     } else {
-
       Multimesh.RENDER_HINT = Multimesh.PICKING;
       this._sculptManager.preUpdate();
 
       if (action === Enums.Action.SCULPT_EDIT) {
         Multimesh.RENDER_HINT = Multimesh.SCULPT;
         this._sculptManager.update(this);
-        if (this.getMesh().isDynamic)
-          this._gui.updateMeshInfo();
+        if (this.getMesh().isDynamic) this._gui.updateMeshInfo();
       }
     }
 

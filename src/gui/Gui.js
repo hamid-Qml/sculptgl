@@ -16,7 +16,6 @@ import ShaderContour from 'render/shaders/ShaderContour';
 import Export from 'files/Export';
 
 class Gui {
-
   constructor(main) {
     this._main = main;
 
@@ -56,6 +55,7 @@ class Gui {
     // Initialize the topbar
     this._topbar = this._guiMain.addTopbar();
     ctrls[idc++] = this._ctrlFiles = new GuiFiles(this._topbar, this);
+    this.addGenAIButton();
     // this.initPrint(this._topbar);
     ctrls[idc++] = this._ctrlScene = new GuiScene(this._topbar, this);
     ctrls[idc++] = this._ctrlStates = new GuiStates(this._topbar, this);
@@ -172,6 +172,17 @@ class Gui {
     });
   }
 
+  addGenAIButton() {
+    var ctrlGenAI = this._topbar.addMenu();
+    ctrlGenAI.domContainer.innerHTML = TR('genAITitle');
+    ctrlGenAI.domContainer.addEventListener('click', function () {
+      const aiPrompt = prompt(
+        'Enter a prompt to generate an object with AI\nTODO: \n- Make this prompt prettier\n- Actually implement the API'
+      );
+      console.log(aiPrompt);
+    });
+  }
+
   updateMesh() {
     this._ctrlRendering.updateMesh();
     this._ctrlTopology.updateMesh();
@@ -201,8 +212,7 @@ class Gui {
   }
 
   deleteGui() {
-    if (!this._guiMain || !this._guiMain.domMain.parentNode)
-      return;
+    if (!this._guiMain || !this._guiMain.domMain.parentNode) return;
     this.callFunc('removeEvents');
     this.setVisibility(false);
     this._guiMain.domMain.parentNode.removeChild(this._guiMain.domMain);
@@ -215,8 +225,7 @@ class Gui {
   callFunc(func, event) {
     for (var i = 0, ctrls = this._ctrls, nb = ctrls.length; i < nb; ++i) {
       var ct = ctrls[i];
-      if (ct && ct[func])
-        ct[func](event);
+      if (ct && ct[func]) ct[func](event);
     }
   }
 }

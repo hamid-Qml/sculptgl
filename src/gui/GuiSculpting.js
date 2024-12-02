@@ -90,6 +90,7 @@ class GuiSculpting {
   }
 
   onChangeTool(newValue) {
+    console.log("onChangeTool", newValue);
     GuiSculptingTools.hide(this._sculptManager.getToolIndex());
     this._sculptManager.setToolIndex(newValue);
     GuiSculptingTools.show(newValue);
@@ -103,6 +104,21 @@ class GuiSculpting {
     this._ctrlTitleCommon.setVisibility(showContinuous || showSym);
 
     this._main.getPicking().updateLocalAndWorldRadius2();
+
+
+    // TODO: extract this part to a separate class called LeftToolbar or something and use that class throughout the code instead of dealing with document directly
+    const toolname = Object.keys(Enums.Tools)[newValue]
+    console.log(toolname)
+
+    if (toolname)
+    {
+      document.querySelectorAll(`#left-toolbar [data-tool]`).forEach((e) => {
+        e.classList.remove("selected")
+      })
+
+      document.querySelector(`#left-toolbar [data-tool="${toolname}"]`)?.classList?.add("selected")
+    }
+
   }
 
   loadAlpha(event) {

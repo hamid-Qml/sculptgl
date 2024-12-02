@@ -11,7 +11,9 @@
   <title> SculptGL - A WebGL sculpting app </title>
 
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' />
   <link rel='stylesheet' href='css/yagui.css' type='text/css' />
+  <link rel='stylesheet' href='css/ui.css' type='text/css' />
 
   <script>
   'use strict';
@@ -31,6 +33,22 @@
 </head>
 
 <body oncontextmenu='return false;'>
+  <div id="left-toolbar">
+    <div id="left-toolbar-tool-transform" title="Transform" data-tool="TRANSFORM">
+      <i class="fas fa-arrows-alt"></i>
+    </div>
+    <div id="left-toolbar-tool-move" title="Move">
+      <i class="fas fa-ruler-combined"></i>
+    </div>
+    <div id="left-toolbar-tool-rotate" title="Rotate">
+      <i class="fas fa-sync-alt"></i>
+    </div>
+    <div id="left-toolbar-tool-scale" title="Scale">
+      <i class="fas fa-expand-arrows-alt"></i>
+    </div>
+  </div>
+
+
   <input type='file' id='fileopen' multiple style='display: none' />
   <input type='file' id='backgroundopen' style='display: none' />
   <input type='file' id='alphaopen' style='display: none' />
