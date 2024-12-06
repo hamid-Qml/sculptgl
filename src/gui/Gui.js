@@ -176,10 +176,8 @@ class Gui {
     var ctrlGenAI = this._topbar.addMenu();
     ctrlGenAI.domContainer.innerHTML = TR('genAITitle');
     ctrlGenAI.domContainer.addEventListener('click', function () {
-      const aiPrompt = prompt(
-        'Enter a prompt to generate an object with AI\nTODO: \n- Make this prompt prettier\n- Actually implement the API'
-      );
-      console.log(aiPrompt);
+      const dialog = document.getElementById('fileDialog');
+      dialog.showModal();
     });
   }
 

@@ -49,6 +49,24 @@
   </div>
 
 
+
+  <dialog id="fileDialog">
+    <form id="uploadForm">
+      <label for="fileInput">Choose an image:</label>
+      <input type="file" id="fileInput" accept="image/*" required>
+      <div class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-message">Uploading...</div>
+      </div>
+      <div class="dialog-buttons">
+        <button class="gui-button" type="submit">Submit</button>
+        <button class="gui-button" type="button" id="closeDialogButton">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+
+
   <input type='file' id='fileopen' multiple style='display: none' />
   <input type='file' id='backgroundopen' style='display: none' />
   <input type='file' id='alphaopen' style='display: none' />
