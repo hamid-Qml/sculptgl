@@ -113,7 +113,7 @@ class SculptGL extends Scene {
       dialogButtons.style.display = 'none';
 
       try {
-        const response = await fetch('https://2ef0-72-255-38-118.ngrok-free.app/generate?media_type=image', {
+        const response = await fetch('https://9bf8-72-255-38-118.ngrok-free.app/generate?media_type=image', {
           method: 'POST',
           headers: { accept: 'application/json' },
           body: formData,
