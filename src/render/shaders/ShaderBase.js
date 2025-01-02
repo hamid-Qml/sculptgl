@@ -5,6 +5,8 @@ import Attribute from 'render/Attribute';
 import colorSpaceGLSL from 'render/shaders/glsl/colorSpace.glsl';
 import curvatureGLSL from 'render/shaders/glsl/curvature.glsl';
 
+console.log("colorSpaceGLSL", colorSpaceGLSL)
+
 var ShaderBase = {};
 ShaderBase.vertexName = 'VertexName';
 ShaderBase.fragmentName = 'FragmentName';

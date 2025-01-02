@@ -4,7 +4,7 @@ import { Manager as HammerManager, Pan, Pinch, Tap } from 'hammerjs';
 import Tablet from 'misc/Tablet';
 import Enums from 'misc/Enums';
 import Utils from 'misc/Utils';
-import Scene from 'Scene';
+import Scene from './Scene';
 import Multimesh from 'mesh/multiresolution/Multimesh';
 
 var MOUSE_LEFT = 1;
@@ -74,14 +74,14 @@ class SculptGL extends Scene {
     window.addEventListener('drop', cbLoadFiles, false);
     document.getElementById('fileopen').addEventListener('change', cbLoadFiles, false);
 
-    // Other toolbars...
-    // TODO: think; not sure if this is the best approach yet.probably better to just extend the yagui interface instead of adding a separate different one
-    document.getElementById('left-toolbar').style.visibility = 'visible';
-    document.getElementById('left-toolbar-tool-transform').addEventListener('click', () => {
-      this._gui.callFunc('onChangeTool', Enums.Tools.TRANSFORM);
-    });
+    // // Other toolbars...
+    // // TODO: think; not sure if this is the best approach yet.probably better to just extend the yagui interface instead of adding a separate different one
+    // document.getElementById('left-toolbar').style.visibility = 'visible';
+    // document.getElementById('left-toolbar-tool-transform').addEventListener('click', () => {
+    //   this._gui.callFunc('onChangeTool', Enums.Tools.TRANSFORM);
+    // });
 
-    this.initAIStuff();
+    // this.initAIStuff();
   }
 
   initAIStuff() {
@@ -224,7 +224,7 @@ class SculptGL extends Scene {
   }
 
   onContextLost() {
-    window.alert('Oops... WebGL context lost.');
+    // window.alert('Oops... WebGL context lost.');
   }
 
   onContextRestored() {
