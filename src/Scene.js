@@ -669,30 +669,6 @@ class Scene {
     if (tool && tool._ctrlAlpha)
       tool._ctrlAlpha.setValue(name);
   }
-
-
-  cleanup() {
-    this._gui.deleteGui();
-
-    const canvas = this._canvas;
-
-    const loseContextExtension = this._gl.getExtension('WEBGL_lose_context');
-
-    if (loseContextExtension) {
-      loseContextExtension.loseContext();
-    }
-
-    const parent = canvas.parentNode;
-    parent.removeChild(canvas);
-  
-    const newCanvas = document.createElement('canvas');
-    newCanvas.id = 'canvas';
-    newCanvas.width = canvas.width;
-    newCanvas.height = canvas.height;
-  
-    parent.appendChild(newCanvas);
-
-  }
 }
 
 export default Scene;

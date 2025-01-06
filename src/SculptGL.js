@@ -72,80 +72,6 @@ class SculptGL extends Scene {
     window.addEventListener('dragenter', cbStopAndPrevent, false);
     window.addEventListener('dragover', cbStopAndPrevent, false);
     window.addEventListener('drop', cbLoadFiles, false);
-    document.getElementById('fileopen').addEventListener('change', cbLoadFiles, false);
-
-    // // Other toolbars...
-    // // TODO: think; not sure if this is the best approach yet.probably better to just extend the yagui interface instead of adding a separate different one
-    // document.getElementById('left-toolbar').style.visibility = 'visible';
-    // document.getElementById('left-toolbar-tool-transform').addEventListener('click', () => {
-    //   this._gui.callFunc('onChangeTool', Enums.Tools.TRANSFORM);
-    // });
-
-    // this.initAIStuff();
-  }
-
-  initAIStuff() {
-    const dialog = document.getElementById('fileDialog');
-    const closeDialogButton = document.getElementById('closeDialogButton');
-    const uploadForm = document.getElementById('uploadForm');
-    const fileInput = document.getElementById('fileInput');
-
-    const loadingState = document.querySelector('.loading-container');
-    const dialogButtons = document.querySelector('.dialog-buttons');
-
-    closeDialogButton.addEventListener('click', () => {
-      dialog.close();
-    });
-
-    uploadForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      if (fileInput.files.length === 0) {
-        alert('Please select a file.');
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append('content', file, file.name);
-
-      loadingState.style.display = 'flex';
-      dialogButtons.style.display = 'none';
-
-      try {
-        const response = await fetch('https://d143-72-255-38-118.ngrok-free.app/generate?media_type=image', {
-          method: 'POST',
-          headers: { accept: 'application/json' },
-          body: formData,
-        });
-
-        console.log(response);
-
-        const blob = await response.blob();
-
-        const fileName = extractFileNameFromHeaders(response.headers) || 'downloaded.obj';
-        const file = new File([blob], fileName, { type: blob.type || 'application/octet-stream' });
-        
-        const fileType = this.getFileType(file.name);
-        this.readFile(file, fileType);
-        dialog.close();
-
-      } finally {
-        // Hide loading state
-        loadingState.style.display = 'none';
-        dialogButtons.style.display = 'flex';
-      }
-    });
-
-    function extractFileNameFromHeaders(headers) {
-      const contentDisposition = headers.get('content-disposition');
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="(.+?)"/);
-        return match ? match[1] : null;
-      }
-      return null;
-    }
-    
   }
 
   onPointer(event) {
@@ -224,7 +150,7 @@ class SculptGL extends Scene {
   }
 
   onContextLost() {
-    // window.alert('Oops... WebGL context lost.');
+    window.alert('Oops... WebGL context lost.');
   }
 
   onContextRestored() {

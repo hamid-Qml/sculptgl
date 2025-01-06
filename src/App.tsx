@@ -1,20 +1,19 @@
-import FileDialog from './components/FileDialog/FileDialog';
 import Toolbar from './components/Toolbar/Toolbar';
-import SculptGL from './SculptGL';
 
+import './App.css';
 import './assets/css/yagui.css';
+import GenAIStuff from './components/GenAIStuff/GenAIStuff';
 
-if (!window.sculptgl) {
-  window.sculptgl = new SculptGL();
-  window.sculptgl.start();
-}
-
+/**
+ * The React App is only responsible for rendering the UI overlays, all the webgl stuff is done in the SculptGL class.
+ * the useSculptGL hook is used to interact with the SculptGL class.
+ */
 function App() {
   return (
     <div>
       <Toolbar />
-      <FileDialog />
-      </div>
+      <GenAIStuff />
+    </div>
   );
 }
 

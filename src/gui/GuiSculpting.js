@@ -30,6 +30,9 @@ class GuiSculpting {
     this._ctrlSymmetry = null;
     this._ctrlContinuous = null;
     this._ctrlTitleCommon = null;
+
+    this._eventCallbacks = {};
+
     this.init(guiParent);
   }
 
@@ -89,6 +92,24 @@ class GuiSculpting {
       tool.toggleNegative();
   }
 
+  addEventCallback(eventName, callback) {
+    if (!this._eventCallbacks[eventName]) {
+      this._eventCallbacks[eventName] = [];
+    }
+    this._eventCallbacks[eventName].push(callback);
+  }
+
+  removeEventCallback(eventName, callback) {
+    if (this._eventCallbacks[eventName]) {
+      this._eventCallbacks[eventName] = this._eventCallbacks[eventName].filter((cb) => cb !== callback);
+    }
+  }
+
+  notifyEventCallbacks(eventName, ...args) {
+    console.log("notifyeventcallbacks : ", eventName, args, this._eventCallbacks);
+    this._eventCallbacks[eventName]?.forEach((callback) => callback(...args));
+  }
+
   onChangeTool(newValue) {
     console.log("onChangeTool", newValue);
     GuiSculptingTools.hide(this._sculptManager.getToolIndex());
@@ -105,20 +126,7 @@ class GuiSculpting {
 
     this._main.getPicking().updateLocalAndWorldRadius2();
 
-
-    // TODO: extract this part to a separate class called LeftToolbar or something and use that class throughout the code instead of dealing with document directly
-    const toolname = Object.keys(Enums.Tools)[newValue]
-    console.log(toolname)
-
-    if (toolname)
-    {
-      document.querySelectorAll(`#left-toolbar [data-tool]`).forEach((e) => {
-        e.classList.remove("selected")
-      })
-
-      document.querySelector(`#left-toolbar [data-tool="${toolname}"]`)?.classList?.add("selected")
-    }
-
+    this.notifyEventCallbacks('onChangeTool', newValue);
   }
 
   loadAlpha(event) {

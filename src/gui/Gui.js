@@ -55,7 +55,6 @@ class Gui {
     // Initialize the topbar
     this._topbar = this._guiMain.addTopbar();
     ctrls[idc++] = this._ctrlFiles = new GuiFiles(this._topbar, this);
-    this.addGenAIButton();
     // this.initPrint(this._topbar);
     ctrls[idc++] = this._ctrlScene = new GuiScene(this._topbar, this);
     ctrls[idc++] = this._ctrlStates = new GuiStates(this._topbar, this);
@@ -169,15 +168,6 @@ class Gui {
     ctrlAbout.domContainer.innerHTML = TR('about');
     ctrlAbout.domContainer.addEventListener('mousedown', function () {
       window.open('http://stephaneginier.com', '_blank');
-    });
-  }
-
-  addGenAIButton() {
-    var ctrlGenAI = this._topbar.addMenu();
-    ctrlGenAI.domContainer.innerHTML = TR('genAITitle');
-    ctrlGenAI.domContainer.addEventListener('click', function () {
-      const dialog = document.getElementById('fileDialog');
-      dialog.showModal();
     });
   }
 
