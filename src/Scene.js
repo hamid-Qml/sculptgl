@@ -1,26 +1,27 @@
-import { vec3, mat4 } from 'gl-matrix';
-import getOptionsURL from 'misc/getOptionsURL';
-import Enums from 'misc/Enums';
-import Utils from 'misc/Utils';
+import Background from 'drawables/Background';
+import Primitives from 'drawables/Primitives';
+import Rtt from 'drawables/Rtt';
 import SculptManager from 'editing/SculptManager';
 import Subdivision from 'editing/Subdivision';
 import Import from 'files/Import';
+import { mat4, vec3 } from 'gl-matrix';
 import Gui from 'gui/Gui';
 import Camera from 'math3d/Camera';
 import Picking from 'math3d/Picking';
-import Background from 'drawables/Background';
 import Mesh from 'mesh/Mesh';
-import Multimesh from 'mesh/multiresolution/Multimesh';
-import Primitives from 'drawables/Primitives';
-import StateManager from 'states/StateManager';
-import RenderData from 'mesh/RenderData';
-import Rtt from 'drawables/Rtt';
-import ShaderLib from 'render/ShaderLib';
 import MeshStatic from 'mesh/meshStatic/MeshStatic';
+import Multimesh from 'mesh/multiresolution/Multimesh';
+import RenderData from 'mesh/RenderData';
+import Enums from 'misc/Enums';
+import getOptionsURL from 'misc/getOptionsURL';
+import Utils from 'misc/Utils';
+import ShaderLib from 'render/ShaderLib';
 import WebGLCaps from 'render/WebGLCaps';
+import StateManager from 'states/StateManager';
+import * as THREE from 'three';
+import { ViewportGizmo } from 'three-viewport-gizmo';
 
 class Scene {
-
   constructor() {
     this._gl = null; // webgl context
 
@@ -41,6 +42,12 @@ class Scene {
     this._camera = new Camera(this);
     this._picking = new Picking(this); // the ray picking
     this._pickingSym = new Picking(this, true); // the symmetrical picking
+
+    this._gizmoCanvasElement = document.getElementById('viewport-gizmo-canvas');
+    this._gizmoRenderer = null;
+    this._gizmoScene = null;
+    this._gizmoCamera = null;
+    this._viewportGizmo = null;
 
     // TODO primitive builder
     this._meshPreview = null;
@@ -77,8 +84,7 @@ class Scene {
 
   start() {
     this.initWebGL();
-    if (!this._gl)
-      return;
+    if (!this._gl) return;
 
     this._sculptManager = new SculptManager(this);
     this._background = new Background(this._gl, this);
@@ -90,6 +96,7 @@ class Scene {
 
     this._grid = Primitives.createGrid(this._gl);
     this.initGrid();
+    this.initViewportGizmo();
 
     this.loadTextures();
     this._gui.initGui();
@@ -102,8 +109,7 @@ class Scene {
 
   addModelURL(url) {
     var fileType = this.getFileType(url);
-    if (!fileType)
-      return;
+    if (!fileType) return;
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -111,8 +117,7 @@ class Scene {
     xhr.responseType = fileType === 'obj' ? 'text' : 'arraybuffer';
 
     xhr.onload = function () {
-      if (xhr.status === 200)
-        this.loadScene(xhr.response, fileType);
+      if (xhr.status === 200) this.loadScene(xhr.response, fileType);
     }.bind(this);
 
     xhr.send(null);
@@ -197,6 +202,49 @@ class Scene {
     grid.setFlatColor([0.04, 0.04, 0.04]);
   }
 
+  // TODO: extract to a separate class, like the Camera
+  initViewportGizmo() {
+    const canvasElement = this._gizmoCanvasElement;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, canvasElement.clientWidth / canvasElement.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasElement, alpha: true });
+
+    camera.position.z = 80;
+
+    const gizmo = new ViewportGizmo(camera, renderer, {
+      placement: 'center-center',
+      id: 'gizmo-element',
+      size: 128,
+      container: document.getElementById('gizmo-container'),
+    });
+
+    const lastQuat = camera.quaternion.clone();
+
+    const animate = () => {
+      this.syncCamerasThreeToWebGL(camera, this._camera);
+      renderer.render(scene, camera);
+      gizmo.render();
+    };
+
+    renderer.setAnimationLoop(animate);
+
+    this._gizmoRenderer = renderer;
+    this._gizmoScene = scene;
+    this._gizmoCamera = camera;
+    this._viewportGizmo = gizmo;
+
+    this.gizmoOnResize();
+  }
+
+  gizmoOnResize() {
+    this._gizmoCamera.aspect = this._gizmoCanvasElement.clientWidth / this._gizmoCanvasElement.clientHeight;
+    this._gizmoCamera.updateProjectionMatrix();
+    this._gizmoRenderer.setSize(this._gizmoCanvasElement.clientWidth, this._gizmoCanvasElement.clientHeight);
+
+    this._viewportGizmo.update();
+  }
+
   setOrUnsetMesh(mesh, multiSelect) {
     if (!mesh) {
       this._selectMeshes.length = 0;
@@ -222,13 +270,11 @@ class Scene {
   }
 
   renderSelectOverRtt() {
-    if (this._requestRender())
-      this._drawFullScene = false;
+    if (this._requestRender()) this._drawFullScene = false;
   }
 
   _requestRender() {
-    if (this._preventRender === true)
-      return false; // render already requested for the next frame
+    if (this._preventRender === true) return false; // render already requested for the next frame
 
     window.requestAnimationFrame(this.applyRender.bind(this));
     this._preventRender = true;
@@ -262,7 +308,50 @@ class Scene {
     gl.enable(gl.DEPTH_TEST);
 
     this._sculptManager.postRender(); // draw sculpting gizmo stuffs
+
+    // TODO: optimize this... only sync when needed instead of on every render.
+    this.syncCamerasWebGLToThree(this._camera, this._gizmoCamera);
+    this._viewportGizmo.update();
   }
+
+  syncCamerasWebGLToThree(webglCamera, threeCamera) {
+    // Get the camera position
+    const position = webglCamera.computePosition();
+    threeCamera.position.set(position[0], position[1], position[2]);
+
+    // Get the center/target point
+    const center = webglCamera._center;
+    const target = new THREE.Vector3(center[0], center[1], center[2]);
+
+    // Set up and position
+    const up = new THREE.Vector3(0, 1, 0);
+    threeCamera.up.copy(up);
+    threeCamera.lookAt(target);
+
+    // Match FOV and other properties
+    if (webglCamera.isOrthographic()) {
+      // For orthographic camera
+      const zoom = webglCamera.getOrthoZoom();
+      threeCamera.left = -webglCamera._width * zoom;
+      threeCamera.right = webglCamera._width * zoom;
+      threeCamera.top = webglCamera._height * zoom;
+      threeCamera.bottom = -webglCamera._height * zoom;
+      threeCamera.near = webglCamera._near;
+      threeCamera.far = webglCamera._far;
+    } else {
+      // For perspective camera
+      threeCamera.fov = webglCamera.getFov();
+      threeCamera.aspect = webglCamera._width / webglCamera._height;
+      threeCamera.near = webglCamera._near;
+      threeCamera.far = webglCamera._far;
+    }
+
+    // Update the camera matrices
+    threeCamera.updateProjectionMatrix();
+    threeCamera.updateMatrixWorld();
+  }
+
+  syncCamerasThreeToWebGL(threeCamera, webglCamera) {}
 
   _drawScene() {
     var gl = this._gl;
@@ -274,12 +363,12 @@ class Scene {
     // CONTOUR 1/2
     ///////////////
     gl.disable(gl.DEPTH_TEST);
-    var showContour = this._selectMeshes.length > 0 && this._showContour && ShaderLib[Enums.Shader.CONTOUR].color[3] > 0.0;
+    var showContour =
+      this._selectMeshes.length > 0 && this._showContour && ShaderLib[Enums.Shader.CONTOUR].color[3] > 0.0;
     if (showContour) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this._rttContour.getFramebuffer());
       gl.clear(gl.COLOR_BUFFER_BIT);
-      for (var s = 0, sel = this._selectMeshes, nbSel = sel.length; s < nbSel; ++s)
-        sel[s].renderFlatColor(this);
+      for (var s = 0, sel = this._selectMeshes, nbSel = sel.length; s < nbSel; ++s) sel[s].renderFlatColor(this);
     }
     gl.enable(gl.DEPTH_TEST);
 
@@ -314,8 +403,7 @@ class Scene {
     // wireframe for dynamic mesh has duplicate edges
     gl.depthFunc(gl.LESS);
     for (i = 0; i < nbMeshes; ++i) {
-      if (meshes[i].getShowWireframe())
-        meshes[i].renderWireframe(this);
+      if (meshes[i].getShowWireframe()) meshes[i].renderWireframe(this);
     }
     gl.depthFunc(gl.LEQUAL);
 
@@ -363,19 +451,18 @@ class Scene {
   initWebGL() {
     var attributes = {
       antialias: false,
-      stencil: true
+      stencil: true,
     };
 
     var canvas = document.getElementById('canvas');
-    var gl = this._gl = canvas.getContext('webgl', attributes) || canvas.getContext('experimental-webgl', attributes);
+    var gl = (this._gl = canvas.getContext('webgl', attributes) || canvas.getContext('experimental-webgl', attributes));
     if (!gl) {
       window.alert('Could not initialise WebGL. No WebGL, no SculptGL. Sorry.');
       return;
     }
 
     WebGLCaps.initWebGLExtensions(gl);
-    if (!WebGLCaps.getWebGLExtension('OES_element_index_uint'))
-      RenderData.ONLY_DRAW_ARRAYS = true;
+    if (!WebGLCaps.getWebGLExtension('OES_element_index_uint')) RenderData.ONLY_DRAW_ARRAYS = true;
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
@@ -406,7 +493,7 @@ class Scene {
       var mat = new Image();
       mat.src = path;
 
-      console.log(mat)
+      console.log(mat);
 
       mat.onload = function () {
         ShaderMatcap.createTexture(gl, mat, idMaterial);
@@ -414,8 +501,7 @@ class Scene {
       };
     };
 
-    for (var i = 0, mats = ShaderMatcap.matcaps, l = mats.length; i < l; ++i)
-      loadTex(mats[i].path, i);
+    for (var i = 0, mats = ShaderMatcap.matcaps, l = mats.length; i < l; ++i) loadTex(mats[i].path, i);
 
     this.initAlphaTextures();
   }
@@ -453,6 +539,7 @@ class Scene {
     this._rttOpaque.onResize(newWidth, newHeight);
     this._rttTransparent.onResize(newWidth, newHeight);
 
+    this.gizmoOnResize();
     this.render();
   }
 
@@ -524,7 +611,16 @@ class Scene {
   }
 
   addTorus(preview) {
-    var mesh = new Multimesh(Primitives.createTorus(this._gl, this._torusLength, this._torusWidth, this._torusRadius, this._torusRadial, this._torusTubular));
+    var mesh = new Multimesh(
+      Primitives.createTorus(
+        this._gl,
+        this._torusLength,
+        this._torusWidth,
+        this._torusRadius,
+        this._torusRadial,
+        this._torusTubular
+      )
+    );
     if (preview) {
       mesh.setShowWireframe(true);
       var scale = 0.3 * Utils.SCALE;
@@ -539,8 +635,7 @@ class Scene {
 
   subdivideClamp(mesh, linear) {
     Subdivision.LINEAR = !!linear;
-    while (mesh.getNbFaces() < 50000)
-      mesh.addLevel();
+    while (mesh.getNbFaces() < 50000) mesh.addLevel();
     // keep at max 4 multires
     mesh._meshes.splice(0, Math.min(mesh._meshes.length - 4, 4));
     mesh._sel = mesh._meshes.length - 1;
@@ -568,7 +663,7 @@ class Scene {
 
     var meshes = this._meshes;
     for (var i = 0; i < nbNewMeshes; ++i) {
-      var mesh = newMeshes[i] = new Multimesh(newMeshes[i]);
+      var mesh = (newMeshes[i] = new Multimesh(newMeshes[i]));
 
       if (!this._vertexSRGB && mesh.getColors()) {
         Utils.convertArrayVec3toSRGB(mesh.getColors());
@@ -598,8 +693,7 @@ class Scene {
   }
 
   deleteCurrentSelection() {
-    if (!this._mesh)
-      return;
+    if (!this._mesh) return;
 
     this.removeMeshes(this._selectMeshes);
     this._stateManager.pushStateRemove(this._selectMeshes.slice());
@@ -609,8 +703,7 @@ class Scene {
 
   removeMeshes(rm) {
     var meshes = this._meshes;
-    for (var i = 0; i < rm.length; ++i)
-      meshes.splice(this.getIndexMesh(rm[i]), 1);
+    for (var i = 0; i < rm.length; ++i) meshes.splice(this.getIndexMesh(rm[i]), 1);
   }
 
   getIndexMesh(mesh, select) {
@@ -618,8 +711,7 @@ class Scene {
     var id = mesh.getID();
     for (var i = 0, nbMeshes = meshes.length; i < nbMeshes; ++i) {
       var testMesh = meshes[i];
-      if (testMesh === mesh || testMesh.getID() === id)
-        return i;
+      if (testMesh === mesh || testMesh.getID() === id) return i;
     }
     return -1;
   }
@@ -666,8 +758,7 @@ class Scene {
     var entry = {};
     entry[name] = name;
     this.getGui().addAlphaOptions(entry);
-    if (tool && tool._ctrlAlpha)
-      tool._ctrlAlpha.setValue(name);
+    if (tool && tool._ctrlAlpha) tool._ctrlAlpha.setValue(name);
   }
 }
 

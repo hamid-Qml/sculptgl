@@ -1,47 +1,16 @@
-import { useEffect, useState } from 'react';
-import useSculptGL from '@/hooks/useSculptGL';
 import ImageIconButton from '@/components/ui/button/IconButton/IconButton';
+import useSculptGL from '@/hooks/useSculptGL';
+import { useState } from 'react';
 
 import AIImageIcon from '@/assets/icons/image-ai-fill.svg?react';
 import FileDialog from './FileDialog/FileDialog';
 
-export default function GenAIStuff() {
-  const { initialized, _sculptgl } = useSculptGL();
+import styles from './GenAIStuff.module.scss';
 
-  const [sidebarWidth, setSidebarWidth] = useState(0);
-  const [topBarHeight, setTopBarHeight] = useState(0);
+export default function GenAIStuff() {
+  const { _sculptgl } = useSculptGL();
 
   const [showDialog, setShowDialog] = useState(false);
-
-  useEffect(() => {
-    const sidebarElement = _sculptgl?._gui?._sidebar?.domSidebar;
-    const topbarElement = _sculptgl?._gui?._topbar?.domTopbar;
-
-    if (initialized && sidebarElement && topbarElement) {
-      const updateSidebarWidth = () => {
-        setSidebarWidth(sidebarElement.offsetWidth);
-      };
-
-      const updateTopBarHeight = () => {
-        setTopBarHeight(topbarElement.offsetHeight);
-      };
-
-      updateSidebarWidth();
-      updateTopBarHeight();
-
-      const resizeObserver = new ResizeObserver(() => {
-        updateSidebarWidth();
-        updateTopBarHeight();
-      });
-
-      resizeObserver.observe(sidebarElement);
-      resizeObserver.observe(topbarElement);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-  }, [initialized, _sculptgl]);
 
   async function handleFileSubmit(file: File) {
     const formData = new FormData();
@@ -53,8 +22,6 @@ export default function GenAIStuff() {
         headers: { accept: 'application/json' },
         body: formData,
       });
-
-      console.log(response);
 
       const blob = await response.blob();
 
@@ -98,8 +65,8 @@ export default function GenAIStuff() {
   }
 
   return (
-    <div style={{ position: 'absolute', right: sidebarWidth + 10, top: topBarHeight + 10, zIndex: 2 }}>
-      <ImageIconButton tooltip="Generate with AI" tooltipPlacement="left" onClick={handleOpen}>
+    <div className={styles.container}>
+      <ImageIconButton tooltip="Generate with AI" tooltipPlacement="right" onClick={handleOpen}>
         <AIImageIcon style={{ padding: '0.25rem' }} />
       </ImageIconButton>
       <FileDialog open={showDialog} onClose={handleClose} onSubmit={handleFileSubmit} />

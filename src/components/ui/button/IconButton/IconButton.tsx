@@ -17,11 +17,7 @@ function ImageIconButton(props: ImageIconButtonProps) {
   const { id, children, isSelected, onClick, tooltip, tooltipPlacement, ...rest } = props;
   return (
     <Tooltip
-      content={
-        tooltip ? (
-          <span style={{ fontSize: '1.5rem', textTransform: 'capitalize' }}>{tooltip}</span>
-        ) : null
-      }
+      content={tooltip ? <span style={{ fontSize: '1.25rem', textTransform: 'capitalize' }}>{tooltip}</span> : null}
       placement={tooltipPlacement}
     >
       <button {...rest} id={id} onClick={onClick} className={clsx(styles.toolItem, isSelected && styles.selected)}>
