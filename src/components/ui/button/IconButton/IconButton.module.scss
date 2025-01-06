@@ -1,0 +1,31 @@
+.toolItem {
+  display: grid;
+  place-items: center;
+
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.selected {
+    background: rgba(144, 164, 194, 0.5);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
+  }
+
+  img {
+    height: 100%;
+    width: 100%;
+  }
+}

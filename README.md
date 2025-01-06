@@ -1,39 +1,50 @@
-Status
-======
+# React + TypeScript + Vite
 
-In the Original SculptGL repository, we want to add the following features:
-  1. Ability to add a shape (say sphere) and then being able to apply transformations to the sphere and have an intuitive way to position the sphere on another object.
-  2. Ability to add a prompt or a reference of a model to be created and then call an external API to load the generated model onto the interface.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-SculptGL - WebGL sculpting
-==========================
+Currently, two official plugins are available:
 
-You can try it [**here**](http://stephaneginier.com/sculptgl).
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-Additional information can be found on the [website](http://stephaneginier.com/).
+## Expanding the ESLint configuration
 
-Tools
-=====
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-Nodejs needs to be installed [nodejs](http://nodejs.org/).
+- Configure the top-level `parserOptions` property like this:
 
-Then for the browser build :
-```
-yarn # npm install
-yarn dev # npm run dev (npm run release for final build, npm run website should not be used)
-// visit app/index.html
-```
-
-For standalone :
-```
-yarn add electron
-yarn add electron-packager
-yarn standalone
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
 ```
 
-Credits
-=======
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-#### Environments
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
 
-The raw environments are from https://hdrihaven.com/hdris
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
+})
+```

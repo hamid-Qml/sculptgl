@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "types": ["./src/types/global.d.ts"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@lib/*": ["lib/*"],
+      "assets/*": ["src/assets/*"],
+      "components/*": ["src/components/*"],
+      "drawables/*": ["src/drawables/*"],
+      "editing/*": ["src/editing/*"],
+      "files/*": ["src/files/*"],
+      "gui/*": ["src/gui/*"],
+      "math3d/*": ["src/math3d/*"],
+      "mesh/*": ["src/mesh/*"],
+      "misc/*": ["src/misc/*"],
+      "render/*": ["src/render/*"],
+      "states/*": ["src/states/*"],
+      "worker/*": ["src/worker/*"]
+    }
+  },
+  "include": ["src"]
+}
