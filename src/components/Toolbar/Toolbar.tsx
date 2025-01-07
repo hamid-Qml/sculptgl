@@ -16,6 +16,7 @@ import SmoothIcon from 'assets/icons/tools/smooth.png';
 import TransformIcon from 'assets/icons/tools/transform.png';
 
 import ImageIconButton from '../ui/button/IconButton/IconButton';
+import GenAIStuff from '../GenAIStuff/GenAIStuff';
 
 const tools = [
   { id: Enums.Tools.TRANSFORM, name: 'Transform', icon: TransformIcon },
@@ -41,19 +42,22 @@ function Toolbar() {
 
   return (
     <div id="left-toolbar" className={styles.leftToolbar}>
-      {tools.map((tool) => (
-        <ImageIconButton
-          key={tool.id}
-          id={`left-toolbar-tool-${tool.id}`}
-          alt={tool.name}
-          isSelected={selectedSculptingTool === tool.id}
-          onClick={() => handleToolClick(tool.id)}
-          tooltip={tool.name.toLowerCase()}
-          tooltipPlacement="right"
-        >
-          <img src={tool.icon} />
-        </ImageIconButton>
-      ))}
+      <GenAIStuff />
+      <div className={styles.tools}>
+        {tools.map((tool) => (
+          <ImageIconButton
+            key={tool.id}
+            id={`left-toolbar-tool-${tool.id}`}
+            alt={tool.name}
+            isSelected={selectedSculptingTool === tool.id}
+            onClick={() => handleToolClick(tool.id)}
+            tooltip={tool.name.toLowerCase()}
+            tooltipPlacement="right"
+          >
+            <img src={tool.icon} />
+          </ImageIconButton>
+        ))}
+      </div>
     </div>
   );
 }

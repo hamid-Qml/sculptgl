@@ -1,6 +1,7 @@
 import ImageIconButton from '@/components/ui/button/IconButton/IconButton';
 import useSculptGL from '@/hooks/useSculptGL';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import AIImageIcon from '@/assets/icons/image-ai-fill.svg?react';
 import FileDialog from './FileDialog/FileDialog';
@@ -69,7 +70,7 @@ export default function GenAIStuff() {
       <ImageIconButton tooltip="Generate with AI" tooltipPlacement="right" onClick={handleOpen}>
         <AIImageIcon style={{ padding: '0.25rem' }} />
       </ImageIconButton>
-      <FileDialog open={showDialog} onClose={handleClose} onSubmit={handleFileSubmit} />
+      {createPortal(<FileDialog open={showDialog} onClose={handleClose} onSubmit={handleFileSubmit} />, document.body)}
     </div>
   );
 }

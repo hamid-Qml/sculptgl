@@ -26,3 +26,8 @@
 #gizmo-element {
   margin: 0px !important;
 }
+
+/* temporarily disable the sidebar for demo... */
+.gui-sidebar {
+  display: none;
+}

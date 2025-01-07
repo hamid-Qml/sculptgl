@@ -22,7 +22,6 @@ export default function Tooltip(props: TooltipProps) {
       ref={refs.setReference}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
-      style={{ display: 'inline-block', position: 'relative' }}
     >
       {children}
       {isOpen && (

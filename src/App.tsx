@@ -1,4 +1,3 @@
-import GenAIStuff from './components/GenAIStuff/GenAIStuff';
 import Toolbar from './components/Toolbar/Toolbar';
 
 import './App.css';
@@ -9,12 +8,7 @@ import './assets/css/yagui.css';
  * the useSculptGL hook is used to interact with the SculptGL class.
  */
 function App() {
-  return (
-    <div>
-      <Toolbar />
-      <GenAIStuff />
-    </div>
-  );
+  return <Toolbar />;
 }
 
 export default App;
